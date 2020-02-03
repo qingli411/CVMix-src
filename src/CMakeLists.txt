@@ -4,9 +4,9 @@ cmake_minimum_required(VERSION 3.1)
 project (cvmix Fortran)
 
 # Set default installation prefix
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/../ CACHE PATH "Directory to install CVMix in" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 # CVMix source files
 set(CVMix_SHARED_SOURCE_DIR ${PROJECT_SOURCE_DIR}/shared)
@@ -29,6 +29,29 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/../include)
 # Build CVMix library
 add_library(cvmix STATIC ${SOURCES})
 
-# Install
+# Install CVMix library
 install(TARGETS cvmix DESTINATION lib)
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)
+
+# Build CVMix executable for tests
+if(CVMix_Test)
+    # CVMix driver source files
+    set(CVMix_DRIVERS_SOURCE_DIR ${PROJECT_SOURCE_DIR}/drivers)
+
+    # Build CVMix executable
+    add_executable(cvmix_exe
+        ${PROJECT_SOURCE_DIR}/cvmix_driver.F90
+        ${PROJECT_SOURCE_DIR}/cvmix_io.F90
+        ${CVMix_DRIVERS_SOURCE_DIR}/cvmix_bgrnd_BL.F90
+        ${CVMix_DRIVERS_SOURCE_DIR}/cvmix_ddiff_drv.F90
+        ${CVMix_DRIVERS_SOURCE_DIR}/cvmix_kpp_drv.F90
+        ${CVMix_DRIVERS_SOURCE_DIR}/cvmix_shear_drv.F90
+        ${CVMix_DRIVERS_SOURCE_DIR}/cvmix_tidal_Simmons.F90
+    )
+    set_property(TARGET cvmix_exe PROPERTY RUNTIME_OUTPUT_NAME "cvmix")
+    target_link_libraries(cvmix_exe cvmix)
+
+    # Install
+    install(TARGETS cvmix_exe DESTINATION bin)
+endif(CVMix_Test)
+
