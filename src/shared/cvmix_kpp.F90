@@ -2843,9 +2843,10 @@ contains
     if (lm) then
       if (zeta.ge.cvmix_zero) then
         ! Stable region
-        compute_phi_inv_StokesMOST = cvmix_one/(cvmix_one + real(5,cvmix_r8)*zetastar)
+        ! Eq (16) of Large et al., 2021
+        compute_phi_inv_StokesMOST = cvmix_one/(cvmix_one + real(14,cvmix_r8)*zetastar)
       else
-        ! Eq (18) of Large et al., 2019
+        ! Eq (15) of Large et al., 2021
         compute_phi_inv_StokesMOST = &
         (cvmix_one - real(14,cvmix_r8)*zetastar)**(cvmix_one/real(3,cvmix_r8))
       endif
@@ -2853,9 +2854,10 @@ contains
     if (ls) then
       if (zeta.ge.cvmix_zero) then
         ! Stable region
+        ! Eq (16) of Large et al., 2021
         compute_phi_inv_StokesMOST = cvmix_one/(cvmix_one + real(5,cvmix_r8)*zetastar)
      else
-        ! Eq (19) of Large et al., 2019
+        ! Eq (15) of Large et al., 2021
         compute_phi_inv_StokesMOST = &
         (cvmix_one - real(25,cvmix_r8)*zetastar)**(cvmix_one/real(3,cvmix_r8))
       endif
