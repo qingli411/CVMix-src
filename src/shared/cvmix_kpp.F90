@@ -768,7 +768,7 @@ contains
     real(cvmix_r8) :: ShapeNoMatchAtS
 
     ! Parameters for Stokes_MOST
-    real(cvmix_r8) :: Gcomposite, Hsigma, sigh, XIone
+    real(cvmix_r8) :: Gcomposite, Hsigma, sigh
 
     ! Constant from params
     integer :: interp_type2, MatchTechnique
@@ -2519,6 +2519,7 @@ contains
     ! Local variables
     integer :: kt, nlev
     real(cvmix_r8) :: Cv, Vtc
+    real(cvmix_r8) :: ws_wstar ! ratio in limit of pure convection
     ! N_cntr: buoyancy frequency at cell centers, derived from either N_iface
     !        or Nsqr_iface (units: 1/s)
     real(cvmix_r8), dimension(size(zt_cntr)) :: N_cntr
@@ -2711,6 +2712,25 @@ contains
 
       case DEFAULT
 
+      if ( CVmix_kpp_params_in%lStokesMOST ) then
+
+        ws_wstar = CVmix_kpp_params_in%vonkarman * real(25,cvmix_r8)
+        ws_wstar = CVmix_kpp_params_in%vonkarman * ws_wstar**(cvmix_one/real(3,cvmix_r8))
+
+        Vtc = sqrt(0.2_cvmix_r8 *3.8409_cvmix_r8 / ws_wstar) / CVmix_kpp_params_in%Ri_crit
+
+        Cv = 1.4_cvmix_r8
+        do kt=1,nlev
+          cvmix_kpp_compute_unresolved_shear(kt) = &
+                 -zt_cntr(kt) * N_cntr(kt) * Cv * Vtc * ws_cntr(kt) / ws_wstar
+          if (cvmix_kpp_compute_unresolved_shear(kt).lt.                       &
+              CVmix_kpp_params_in%minVtsqr) then
+            cvmix_kpp_compute_unresolved_shear(kt) = CVmix_kpp_params_in%minVtsqr
+          end if
+        end do
+
+      else ! lStokesMOST
+
         ! From LMD 94, Vtc = sqrt(-beta_T/(c_s*eps))/kappa^2
         Vtc = sqrt(0.2_cvmix_r8/(cvmix_get_kpp_real('c_s', CVmix_kpp_params_in) * &
               cvmix_get_kpp_real('surf_layer_ext', CVmix_kpp_params_in))) / &
@@ -2735,6 +2755,7 @@ contains
             cvmix_kpp_compute_unresolved_shear(kt) = CVmix_kpp_params_in%minVtsqr
           end if
         end do
+      end if
 
     end select
 
@@ -3231,7 +3252,7 @@ subroutine cvmix_kpp_compute_StokesXi (zi, zk, kSL, SLDepth,                    
   real(cvmix_r8) :: uS_TMP, vS_TMP, uSbar_TMP, vSbar_TMP                       ! Temporary Store
   real(cvmix_r8) :: ustar, delH, delU, delV, omega_E2x, cosOmega, sinOmega
   real(cvmix_r8) :: BLDepth, TauMAG, TauCG, TauDG, taux0, tauy0, Stk0 , Pinc
-  real(cvmix_r8) :: a2Gsig, a3Gsig, PBfact , CempCGm, tiny                     ! Empirical constants
+  real(cvmix_r8) :: PBfact , CempCGm                      ! Empirical constants
   real(cvmix_r8) :: dtop, tauEtop, tauStop, tauxtop, tauytop, sigtop           ! Cell top values
   real(cvmix_r8) :: dbot, tauEbot, tauSbot, tauxbot, tauybot, sigbot, Gbot     ! Cell bottom values
   integer        :: ktmp                                                       ! vertical loop
