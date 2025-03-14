@@ -2335,7 +2335,7 @@ contains
         if (compute_wm) then
           do kw = 1,n_sigma
             chi_m = compute_Stokes_chi( xi(kw) , lchi_m=.true. )
-            L_StokesL = cvmix_one - xi(kw)             !wgl - xi
+            L_StokesL = cvmix_one - xi(kw)
             w_m(kw) = compute_phi_inv_StokesMOST(zeta(kw), L_StokesL,           &
                                           CVmix_kpp_params_in, lphi_m=.true.) * &
                                           vonkar*surf_fric_vel / chi_m
@@ -2345,6 +2345,7 @@ contains
         if (compute_ws) then
           do kw = 1,n_sigma
             chi_s = compute_Stokes_chi( xi(kw) , lchi_s=.true. )
+            L_StokesL = cvmix_one - xi(kw)
             w_s(kw) = compute_phi_inv_StokesMOST(zeta(kw), L_StokesL,           &
                                           CVmix_kpp_params_in, lphi_s=.true.) * &
                                           vonkar*surf_fric_vel  / chi_s
